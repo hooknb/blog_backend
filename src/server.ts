@@ -1,13 +1,19 @@
 import express from "express";
 
+// Routes import
+import signupRouter from "./routes/signup";
+
 const app = express();
-const port = 1709;
 
-app.get("*", (req, res, next) => {
-  console.log("Request hit by men.");
-  res.send("Request.");
-});
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}.`);
+// Routes
+app.use("/signup", signupRouter);
+
+// Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
