@@ -1,8 +1,10 @@
 import express from "express";
+require("dotenv").config();
 
 // Routes import
 import signupRouter from "./routes/signup";
 import blogRouter from "./routes/blog";
+import signinRouter from "./routes/signin";
 
 const app = express();
 
@@ -13,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/signup", signupRouter);
 app.use("/api/blog", blogRouter);
+app.use("/api/signin", signinRouter);
 
 // Server
 const PORT = process.env.PORT || 3000;

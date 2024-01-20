@@ -1,5 +1,6 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
+import authenticateJWT from "../authorization";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -9,8 +10,14 @@ const prisma = new PrismaClient();
  * @return  { statusCode: statusCode, data: posts }
  */
 router.get("/", async (req, res) => {
-  const posts = await prisma.post.findMany();
-  res.json({ statusCode: 200, data: posts });
+  try {
+    const posts = await prisma.blog.findMany();
+    res.json({ data: posts });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch blog posts", error: error });
+  }
 });
 
 /**
@@ -19,14 +26,20 @@ router.get("/", async (req, res) => {
  * @return  { statusCode: statusCode, data: posts }
  */
 router.get("/:id", async (req, res) => {
-  const authorId = req.params.id;
-  const posts = await prisma.post.findMany({
-    where: {
-      authorId: authorId,
-    },
-  });
+  try {
+    const authorId = req.params.id;
+    const posts = await prisma.blog.findMany({
+      where: {
+        authorId: authorId,
+      },
+    });
 
-  res.json({ statusCode: 200, data: posts });
+    res.json({ data: posts });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch blog posts", error: error });
+  }
 });
 
 /**
@@ -37,17 +50,25 @@ router.get("/:id", async (req, res) => {
  * @param authorId  ID of the author of the blog post
  * @return  { statusCode: statusCode, message: message }
  */
-router.post("/", async (req, res) => {
-  await prisma.post.create({
-    data: {
-      title: req.body.title,
-      body: req.body.body,
-      images: req.body.images,
-      authorId: req.body.authorId,
-    },
-  });
+router.post("/", authenticateJWT, async (req, res) => {
+  try {
+    const createdPost = await prisma.blog.create({
+      data: {
+        title: req.body.title,
+        body: req.body.body,
+        images: req.body.images,
+        authorId: req.body.authorId,
+      },
+    });
 
-  res.json({ statusCode: 201, message: "Post created successfully" });
+    if (!createdPost) {
+      res.status(500).json({ message: "Failed to create post" });
+    } else {
+      res.status(201).json({ message: "Post created successfully" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create post", error: error });
+  }
 });
 
 /**
@@ -59,30 +80,34 @@ router.post("/", async (req, res) => {
  * @param authorId  Updated ID of the author of the blog post
  * @return  { statusCode: statusCode, message: message }
  */
-router.patch("/:id", async (req, res) => {
-  const postId = req.params.id;
-  const post = await prisma.post.findUnique({
-    where: {
-      id: postId,
-    },
-  });
-
-  if (post) {
-    await prisma.post.update({
+router.patch("/:id", authenticateJWT, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const post = await prisma.blog.findUnique({
       where: {
         id: postId,
       },
-      data: {
-        title: req.body.title,
-        body: req.body.body,
-        images: req.body.images,
-        authorId: req.body.authorId,
-      },
     });
 
-    res.json({ statusCode: 200, message: "Post successfully updated." });
-  } else {
-    res.json({ statusCode: 404, message: "Post not found." });
+    if (post) {
+      await prisma.blog.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          title: req.body.title,
+          body: req.body.body,
+          images: req.body.images,
+          authorId: req.body.authorId,
+        },
+      });
+
+      res.json({ statusCode: 200, message: "Post successfully updated." });
+    } else {
+      res.json({ statusCode: 404, message: "Post not found." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update post", error: error });
   }
 });
 
@@ -91,15 +116,22 @@ router.patch("/:id", async (req, res) => {
  * @param id  ID of the blog post to be deleted
  * @return  { statusCode: statusCode, message: message }
  */
-router.delete("/:id", async (req, res) => {
-  const postId = req.params.id;
-  await prisma.post.delete({
-    where: {
-      id: postId,
-    },
-  });
+router.delete("/:id", authenticateJWT, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const deletedBlog = await prisma.blog.delete({
+      where: {
+        id: postId,
+      },
+    });
 
-  res.json({ statusCode: 200, message: "Post deleted successfully." });
+    res.json({
+      message: "Post deleted successfully.",
+      deletedBlog: deletedBlog,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete post", error: error });
+  }
 });
 
 export default router;

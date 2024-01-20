@@ -14,10 +14,10 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Post      Post[]
+  blogs     Blog[]
 }
 
-model Post {
+model Blog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   body      String
