@@ -51,12 +51,13 @@ router.get("/:id", async (req, res) => {
  * @return  { statusCode: statusCode, message: message }
  */
 router.post("/", authenticateJWT, async (req, res) => {
+  
   try {
     const createdPost = await prisma.blog.create({
       data: {
         title: req.body.title,
         body: req.body.body,
-        images: req.body.images,
+        images: ,
         authorId: req.body.authorId,
       },
     });
