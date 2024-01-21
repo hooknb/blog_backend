@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to fetch blog posts", error: error });
+      .json({ message: "Failed to fetch blog posts.", error: error });
   }
 });
 
@@ -38,7 +38,7 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to fetch blog posts", error: error });
+      .json({ message: "Failed to fetch blog posts.", error: error });
   }
 });
 
@@ -48,27 +48,26 @@ router.get("/:id", async (req, res) => {
  * @param body  Body of the blog post
  * @param images  Images related to the blog post
  * @param authorId  ID of the author of the blog post
- * @return  { statusCode: statusCode, message: message }
+ * @return  { message: message }
  */
-router.post("/", authenticateJWT, async (req, res) => {
-  
+router.post("/", authenticateJWT, async (req: express.Request | any, res) => {
   try {
     const createdPost = await prisma.blog.create({
       data: {
         title: req.body.title,
         body: req.body.body,
-        images: ,
+        images: req.images,
         authorId: req.body.authorId,
       },
     });
 
     if (!createdPost) {
-      res.status(500).json({ message: "Failed to create post" });
+      res.status(500).json({ message: "Error while uploading post" });
     } else {
-      res.status(201).json({ message: "Post created successfully" });
+      res.status(201).json({ message: "Post created successfully." });
     }
   } catch (error) {
-    res.status(500).json({ message: "Failed to create post", error: error });
+    res.status(500).json({ message: "Failed to create post.", error: error });
   }
 });
 
@@ -108,7 +107,7 @@ router.patch("/:id", authenticateJWT, async (req, res) => {
       res.json({ statusCode: 404, message: "Post not found." });
     }
   } catch (error) {
-    res.status(500).json({ message: "Failed to update post", error: error });
+    res.status(500).json({ message: "Failed to update post.", error: error });
   }
 });
 
@@ -131,7 +130,7 @@ router.delete("/:id", authenticateJWT, async (req, res) => {
       deletedBlog: deletedBlog,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete post", error: error });
+    res.status(500).json({ message: "Failed to delete post.", error: error });
   }
 });
 

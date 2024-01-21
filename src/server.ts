@@ -3,9 +3,8 @@ import fileUpload from "express-fileupload";
 require("dotenv").config();
 
 // Routes import
-import signupRouter from "./routes/signup";
 import blogRouter from "./routes/blog";
-import signinRouter from "./routes/signin";
+import authRouter from "./routes/auth";
 
 const app = express();
 
@@ -15,9 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 // Routes
-app.use("/api/signup", signupRouter);
 app.use("/api/blog", blogRouter);
-app.use("/api/signin", signinRouter);
+app.use("/api/auth", authRouter);
 
 // Server
 const PORT = process.env.PORT || 3000;

@@ -2,7 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import express from "express";
 
 const authenticateJWT = (
-  req: express.Request,
+  req: express.Request | any,
   res: express.Response,
   next: express.NextFunction
 ) => {
@@ -11,12 +11,12 @@ const authenticateJWT = (
   if (authHeader) {
     const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, process.env.SECRET_KEY!, (err, userId) => {
+    jwt.verify(token, process.env.SECRET_KEY!, (err: any, userId: any) => {
       if (err) {
         return res.sendStatus(403);
       }
 
-      req.body.userId = userId;
+      req.user.userId = userId;
       next();
     });
   } else {
